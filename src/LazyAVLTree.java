@@ -1,5 +1,9 @@
 public class LazyAVLTree {
-    TreeNode root;
+    private TreeNode root;
+
+    public LazyAVLTree() {
+        this.root = null;
+    }
 
     public boolean insert(int key) throws IllegalArgumentException {
         return false;
@@ -34,11 +38,52 @@ public class LazyAVLTree {
     }
 
     private static class TreeNode {
-        int key;
-        TreeNode leftChild;
-        TreeNode rightChild;
-        boolean deleted;
+        private int key;
+        private TreeNode leftChild;
+        private TreeNode rightChild;
+        private boolean deleted;
 
+        TreeNode(int key) {
+            this.key = key;
+            this.leftChild = null;
+            this.rightChild = null;
+            this.deleted = false;
+        }
 
+        public int getKey() {
+            return this.key;
+        }
+
+        public void setKey(int newKey) {
+            key = newKey;
+        }
+
+        public TreeNode getLeftChild() {
+            return this.leftChild;
+        }
+
+        public void setLeftChild(TreeNode newLeftChild) {
+            leftChild = newLeftChild;
+        }
+
+        public TreeNode getRightChild() {
+            return this.rightChild;
+        }
+
+        public void setRightChild(TreeNode newRightChild) {
+            rightChild = newRightChild;
+        }
+
+        public boolean isDeleted() {
+            return this.deleted;
+        }
+
+        public void delete() {
+            deleted = true;
+        }
+
+        public void undelete() {
+            deleted = false;
+        }
     }
 }
