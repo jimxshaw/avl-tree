@@ -5,6 +5,14 @@ public class LazyAVLTree {
         this.root = null;
     }
 
+    private TreeNode getRoot() {
+        return this.root;
+    }
+
+    private void setRoot(TreeNode newRoot) {
+        root = newRoot;
+    }
+
     public boolean insert(int key) throws IllegalArgumentException {
         return false;
     }
