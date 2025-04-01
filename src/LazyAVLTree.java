@@ -43,11 +43,17 @@ public class LazyAVLTree {
             return Integer.MIN_VALUE;
         }
 
-        int heightLeft = height(treeNode.getLeftChild());
-        int heightRight = height(treeNode.getRightChild());
+        try {
+            int heightLeft = height(treeNode.getLeftChild());
+            int heightRight = height(treeNode.getRightChild());
 
-        // Adding 1 means to include the current node in this path.
-        return 1 + Math.max(heightLeft, heightRight);
+            // Add 1 to include the current node in this path.
+            return 1 + Math.max(heightLeft, heightRight);
+        }
+        catch(StackOverflowError e) {
+            System.err.println("Stack Overflow: Tree is too deep: " + e);
+            return Integer.MIN_VALUE;
+        }
     }
 
     public int size() {
@@ -59,7 +65,13 @@ public class LazyAVLTree {
             return 0;
         }
 
-        return 1 + size(treeNode.getLeftChild()) + size(treeNode.getRightChild());
+        try {
+            return 1 + size(treeNode.getLeftChild()) + size(treeNode.getRightChild());
+        }
+        catch(StackOverflowError e) {
+            System.err.println("Stack Overflow: Tree is too deep: " + e);
+            return 0;
+        }
     }
 
     public String toString() {
