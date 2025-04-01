@@ -25,20 +25,89 @@ public class LazyAVLTree {
         return false;
     }
 
+    // AVLs are BSTs so the max value is always the very right-most tree node.
     public int findMax() {
-        return 0;
+        TreeNode max = findMax(this.getRoot());
+
+        return (max != null) ? max.getKey() : -1;
     }
 
+    private TreeNode findMax(TreeNode treeNode) {
+        TreeNode max = null;
+
+        while (treeNode != null) {
+            if (!treeNode.isDeleted()) {
+                max = treeNode;
+            }
+
+            // Continue going down the right side of the tree.
+            treeNode = treeNode.getRightChild();
+        }
+
+        return max;
+    }
+
+    // AVLs are BSTs so the min value is always the very left-most tree node.
     public int findMin() {
-        return 0;
+        TreeNode min = findMin(this.getRoot());
+
+        return (min != null) ? min.getKey() : -1;
+    }
+
+    private TreeNode findMin(TreeNode treeNode) {
+        TreeNode min = null;
+
+        while (treeNode != null) {
+            if (!treeNode.isDeleted()) {
+                min = treeNode;
+            }
+
+            // Continue going down the left side of the tree.
+            treeNode = treeNode.getLeftChild();
+        }
+
+        return min;
     }
 
     public int height() {
-        return 0;
+        return height(this.getRoot());
+    }
+
+    private int height(TreeNode treeNode) {
+        // Empty tree has the lowest integer for height.
+        if (treeNode == null) {
+            return Integer.MIN_VALUE;
+        }
+
+        try {
+            int heightLeft = height(treeNode.getLeftChild());
+            int heightRight = height(treeNode.getRightChild());
+
+            // Add 1 to include the current node in this path.
+            return 1 + Math.max(heightLeft, heightRight);
+        }
+        catch(StackOverflowError e) {
+            System.err.println("Stack Overflow: Tree is too deep: " + e);
+            return Integer.MIN_VALUE;
+        }
     }
 
     public int size() {
-        return 0;
+        return size(this.getRoot());
+    }
+
+    private int size(TreeNode treeNode) {
+        if (treeNode == null) {
+            return 0;
+        }
+
+        try {
+            return 1 + size(treeNode.getLeftChild()) + size(treeNode.getRightChild());
+        }
+        catch(StackOverflowError e) {
+            System.err.println("Stack Overflow: Tree is too deep: " + e);
+            return 0;
+        }
     }
 
     public String toString() {
