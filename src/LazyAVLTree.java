@@ -25,12 +25,48 @@ public class LazyAVLTree {
         return false;
     }
 
+    // AVLs are BSTs so the max value is always the very right-most tree node.
     public int findMax() {
-        return 0;
+        TreeNode max = findMax(this.getRoot());
+
+        return (max != null) ? max.getKey() : -1;
     }
 
+    private TreeNode findMax(TreeNode treeNode) {
+        TreeNode max = null;
+
+        while (treeNode != null) {
+            if (!treeNode.isDeleted()) {
+                max = treeNode;
+            }
+
+            // Continue going down the right side of the tree.
+            treeNode = treeNode.getRightChild();
+        }
+
+        return max;
+    }
+
+    // AVLs are BSTs so the min value is always the very left-most tree node.
     public int findMin() {
-        return 0;
+        TreeNode min = findMin(this.getRoot());
+
+        return (min != null) ? min.getKey() : -1;
+    }
+
+    private TreeNode findMin(TreeNode treeNode) {
+        TreeNode min = null;
+
+        while (treeNode != null) {
+            if (!treeNode.isDeleted()) {
+                min = treeNode;
+            }
+
+            // Continue going down the left side of the tree.
+            treeNode = treeNode.getLeftChild();
+        }
+
+        return min;
     }
 
     public int height() {
