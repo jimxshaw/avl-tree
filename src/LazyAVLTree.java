@@ -34,11 +34,32 @@ public class LazyAVLTree {
     }
 
     public int height() {
-        return 0;
+        return height(this.getRoot());
+    }
+
+    private int height(TreeNode treeNode) {
+        // Empty tree has the lowest integer for height.
+        if (treeNode == null) {
+            return Integer.MIN_VALUE;
+        }
+
+        int heightLeft = height(treeNode.getLeftChild());
+        int heightRight = height(treeNode.getRightChild());
+
+        // Adding 1 means to include the current node in this path.
+        return 1 + Math.max(heightLeft, heightRight);
     }
 
     public int size() {
-        return 0;
+        return size(this.getRoot());
+    }
+
+    private int size(TreeNode treeNode) {
+        if (treeNode == null) {
+            return 0;
+        }
+
+        return 1 + size(treeNode.getLeftChild()) + size(treeNode.getRightChild());
     }
 
     public String toString() {
