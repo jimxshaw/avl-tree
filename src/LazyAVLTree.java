@@ -1,5 +1,7 @@
 public class LazyAVLTree {
     private TreeNode root;
+    private static final int KEY_LOWER_LIMIT = 1;
+    private static final int KEY_UPPER_LIMIT = 99;
 
     public LazyAVLTree() {
         this.root = null;
@@ -21,7 +23,33 @@ public class LazyAVLTree {
         return false;
     }
 
-    public boolean contains(int key) throws IllegalArgumentException {
+    public boolean contains(int key) {
+        if (key < KEY_LOWER_LIMIT || key > KEY_UPPER_LIMIT) {
+            throw new IllegalArgumentException("Key must be between " + KEY_LOWER_LIMIT + " and " + KEY_UPPER_LIMIT);
+        }
+
+        // Start traversing from the root.
+        TreeNode currentNode = this.getRoot();
+
+        while (currentNode != null) {
+            // By AVL definition a child node smaller than the
+            // parent node will be a left child.
+            if (key < currentNode.getKey()) {
+                currentNode = currentNode.getLeftChild();
+            }
+            // By AVL definition a child node larger than the
+            // parent node will be a right child.
+            else if (key > currentNode.getKey()) {
+                currentNode = currentNode.getRightChild();
+            }
+            else {
+                // If the key is found then return true only
+                // if the node is not deleted.
+                return !currentNode.isDeleted();
+            }
+        }
+
+        // Key not found.
         return false;
     }
 
