@@ -20,9 +20,7 @@ public class LazyAVLTree {
     }
 
     public boolean delete(int key) {
-        if (key < KEY_LOWER_LIMIT || key > KEY_UPPER_LIMIT) {
-            throw new IllegalArgumentException("Key must be between " + KEY_LOWER_LIMIT + " and " + KEY_UPPER_LIMIT);
-        }
+        validateKey(key);
 
         TreeNode treeNode = findTreeNode(key);
 
@@ -39,9 +37,7 @@ public class LazyAVLTree {
     }
 
     public boolean contains(int key) {
-        if (key < KEY_LOWER_LIMIT || key > KEY_UPPER_LIMIT) {
-            throw new IllegalArgumentException("Key must be between " + KEY_LOWER_LIMIT + " and " + KEY_UPPER_LIMIT);
-        }
+        validateKey(key);
 
         TreeNode treeNode = findTreeNode(key);
 
@@ -72,6 +68,12 @@ public class LazyAVLTree {
 
         // Node not found.
         return null;
+    }
+
+    private static void validateKey(int key) {
+        if (key < KEY_LOWER_LIMIT || key > KEY_UPPER_LIMIT) {
+            throw new IllegalArgumentException("Key must be between " + KEY_LOWER_LIMIT + " and " + KEY_UPPER_LIMIT);
+        }
     }
 
     // AVLs are BSTs so the max value is always the very right-most tree node.
