@@ -1,5 +1,7 @@
 public class LazyAVLTree {
     private TreeNode root;
+    private static final int KEY_LOWER_LIMIT = 1;
+    private static final int KEY_UPPER_LIMIT = 99;
 
     public LazyAVLTree() {
         this.root = null;
@@ -17,12 +19,59 @@ public class LazyAVLTree {
         return false;
     }
 
-    public boolean delete(int key) throws IllegalArgumentException {
+    public boolean delete(int key) {
+        if (key < KEY_LOWER_LIMIT || key > KEY_UPPER_LIMIT) {
+            throw new IllegalArgumentException("Key must be between " + KEY_LOWER_LIMIT + " and " + KEY_UPPER_LIMIT);
+        }
+
+        TreeNode treeNode = findTreeNode(key);
+
+        // To delete a node it has to exist and be active.
+        if (treeNode != null && !treeNode.isDeleted()) {
+            treeNode.delete();
+
+            // Successful lazy deletion.
+            return true;
+        }
+
+        // Either not found or is already deleted.
         return false;
     }
 
-    public boolean contains(int key) throws IllegalArgumentException {
-        return false;
+    public boolean contains(int key) {
+        if (key < KEY_LOWER_LIMIT || key > KEY_UPPER_LIMIT) {
+            throw new IllegalArgumentException("Key must be between " + KEY_LOWER_LIMIT + " and " + KEY_UPPER_LIMIT);
+        }
+
+        TreeNode treeNode = findTreeNode(key);
+
+        // A found node must exist and also be active.
+        return treeNode != null && !treeNode.isDeleted();
+    }
+
+    private TreeNode findTreeNode(int key) {
+        // Start traversing from the root.
+        TreeNode currentNode = this.getRoot();
+
+        while (currentNode != null) {
+            // By AVL definition a child node smaller than the
+            // parent node will be a left child.
+            if (key < currentNode.getKey()) {
+                currentNode = currentNode.getLeftChild();
+            }
+            // By AVL definition a child node larger than the
+            // parent node will be a right child.
+            else if (key > currentNode.getKey()) {
+                currentNode = currentNode.getRightChild();
+            }
+            else {
+                // Found the node.
+                return currentNode;
+            }
+        }
+
+        // Node not found.
+        return null;
     }
 
     // AVLs are BSTs so the max value is always the very right-most tree node.
