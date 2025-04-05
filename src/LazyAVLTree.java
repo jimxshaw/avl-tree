@@ -19,7 +19,22 @@ public class LazyAVLTree {
         return false;
     }
 
-    public boolean delete(int key) throws IllegalArgumentException {
+    public boolean delete(int key) {
+        if (key < KEY_LOWER_LIMIT || key > KEY_UPPER_LIMIT) {
+            throw new IllegalArgumentException("Key must be between " + KEY_LOWER_LIMIT + " and " + KEY_UPPER_LIMIT);
+        }
+
+        TreeNode treeNode = findTreeNode(key);
+
+        // To delete a node it has to exist and be active.
+        if (treeNode != null && !treeNode.isDeleted()) {
+            treeNode.delete();
+
+            // Successful lazy deletion.
+            return true;
+        }
+
+        // Either not found or is already deleted.
         return false;
     }
 
@@ -28,6 +43,13 @@ public class LazyAVLTree {
             throw new IllegalArgumentException("Key must be between " + KEY_LOWER_LIMIT + " and " + KEY_UPPER_LIMIT);
         }
 
+        TreeNode treeNode = findTreeNode(key);
+
+        // A found node must exist and also be active.
+        return treeNode != null && !treeNode.isDeleted();
+    }
+
+    private TreeNode findTreeNode(int key) {
         // Start traversing from the root.
         TreeNode currentNode = this.getRoot();
 
@@ -43,14 +65,13 @@ public class LazyAVLTree {
                 currentNode = currentNode.getRightChild();
             }
             else {
-                // If the key is found then return true only
-                // if the node is not deleted.
-                return !currentNode.isDeleted();
+                // Found the node.
+                return currentNode;
             }
         }
 
-        // Key not found.
-        return false;
+        // Node not found.
+        return null;
     }
 
     // AVLs are BSTs so the max value is always the very right-most tree node.
