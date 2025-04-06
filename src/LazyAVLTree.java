@@ -354,10 +354,6 @@ public class LazyAVLTree {
             return this.key;
         }
 
-        public void setKey(int newKey) {
-            key = newKey;
-        }
-
         public TreeNode getParent() {
             return parent;
         }
