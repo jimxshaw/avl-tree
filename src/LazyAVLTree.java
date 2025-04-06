@@ -1,5 +1,6 @@
 public class LazyAVLTree {
     private TreeNode root;
+    private String lastRotationType;
 
     private static final int KEY_LOWER_LIMIT = 1;
     private static final int KEY_UPPER_LIMIT = 99;
@@ -18,6 +19,10 @@ public class LazyAVLTree {
 
     private void setRoot(TreeNode newRootNode) {
         root = newRootNode;
+    }
+
+    public String getLastRotationType() {
+        return this.lastRotationType;
     }
 
     public boolean insert(int key) {
@@ -44,6 +49,8 @@ public class LazyAVLTree {
                 if (currentNode.isDeleted()) {
                     currentNode.undelete();
                     isInserted = true;
+
+                    this.lastRotationType = NO_ROTATION;
                 }
 
                 // Should return false if the key
@@ -79,7 +86,7 @@ public class LazyAVLTree {
         TreeNode treeNode = parentNode;
 
         // No Rotation is the default.
-        String rotationType = NO_ROTATION;
+        this.lastRotationType = NO_ROTATION;
 
         while (treeNode != null) {
             updateHeight(treeNode);
@@ -89,33 +96,30 @@ public class LazyAVLTree {
             if (balance > 1) {
                 if (key < treeNode.getLeftChild().getKey()) {
                     treeNode = rotateRight(treeNode);
-                    rotationType = SINGLE_ROTATION;
+                    this.lastRotationType = SINGLE_ROTATION;
                 }
                 else {
                     treeNode.setLeftChild(rotateLeft(treeNode.getLeftChild()));
                     treeNode = rotateRight(treeNode);
-                    rotationType = DOUBLE_ROTATION;
+                    this.lastRotationType = DOUBLE_ROTATION;
                 }
             }
             // Heavy on the right side.
             else if (balance < -1) {
                 if (key > treeNode.getRightChild().getKey()) {
                     treeNode = rotateLeft(treeNode);
-                    rotationType = SINGLE_ROTATION;
+                    this.lastRotationType = SINGLE_ROTATION;
                 }
                 else {
                     treeNode.setRightChild(rotateRight(treeNode.getRightChild()));
                     treeNode = rotateLeft(treeNode);
-                    rotationType = DOUBLE_ROTATION;
+                    this.lastRotationType = DOUBLE_ROTATION;
                 }
             }
 
             // Re-balance by moving back up the tree.
             treeNode = treeNode.getParent();
         }
-
-        // Print Rotation Type.
-        System.out.println(rotationType);
 
         // Reaching the end of this method means the new node has been
         // successfully inserted and isInserted will always be true.
