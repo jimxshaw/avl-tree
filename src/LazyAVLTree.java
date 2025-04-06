@@ -15,8 +15,65 @@ public class LazyAVLTree {
         root = newRoot;
     }
 
-    public boolean insert(int key) throws IllegalArgumentException {
-        return false;
+    public boolean insert(int key) {
+        // Part A: make sure the key is within range.
+        validateKey(key);
+
+        // Part B: Insert the new node or re-activate the deleted node.
+        TreeNode currentNode = root;
+        TreeNode parentNode = null;
+        boolean isInserted = false;
+
+        while (currentNode != null) {
+            parentNode = currentNode;
+
+            if (key < currentNode.getKey()) {
+                currentNode = currentNode.getLeftChild();
+            }
+            else if (key > currentNode.getKey()) {
+                currentNode = currentNode.getRightChild();
+            }
+            else {
+                // Getting here means the key already exists.
+                // If the key is deleted then re-activate it.
+                if (currentNode.isDeleted()) {
+                    currentNode.undelete();
+                    isInserted = true;
+                }
+
+                // Should return false if the key
+                // exists and is active.
+                return isInserted;
+            }
+        }
+
+        // If the current node is null then we have reached a Leaf node
+        // and should insert the node here.
+        TreeNode newTreeNode = new TreeNode(key);
+
+        // If the new node has no parent then it must be the root.
+        // By AVL rules, if the key is smaller than the parent's key
+        // then the new node must be inserted to the parent's left.
+        // If the key is larger than the parent's key then the new node
+        // must be inserted to the parent's right.
+        if (parentNode == null) {
+            this.setRoot(newTreeNode);
+        }
+        else if (key < parentNode.getKey()) {
+            parentNode.setLeftChild(newTreeNode);
+        }
+        else {
+            parentNode.setRightChild(newTreeNode);
+        }
+
+        // Mark that a new node has been successfully inserted.
+        isInserted = true;
+
+        // Part C: Re-balance the tree and deal with rotations.
+
+
+
+        return isInserted;
     }
 
     public boolean delete(int key) {
@@ -125,9 +182,9 @@ public class LazyAVLTree {
     }
 
     private int height(TreeNode treeNode) {
-        // Empty tree has the lowest integer for height.
+        // Empty tree has -1 for height by definition.
         if (treeNode == null) {
-            return Integer.MIN_VALUE;
+            return -1;
         }
 
         try {
@@ -139,7 +196,7 @@ public class LazyAVLTree {
         }
         catch(StackOverflowError e) {
             System.err.println("Stack Overflow: Tree is too deep: " + e);
-            return Integer.MIN_VALUE;
+            return -1;
         }
     }
 
