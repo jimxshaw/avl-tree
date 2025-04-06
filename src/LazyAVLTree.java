@@ -91,6 +91,28 @@ public class LazyAVLTree {
         return leftChildHeight - rightChildHeight;
     }
 
+    private TreeNode rotateLeft(TreeNode treeNode) {
+        TreeNode newRootNode = treeNode.getRightChild();
+        treeNode.setRightChild(newRootNode.getLeftChild());
+        newRootNode.setLeftChild(treeNode);
+
+        updateHeight(treeNode);
+        updateHeight(newRootNode);
+
+        return newRootNode;
+    }
+
+    private TreeNode rotateRight(TreeNode treeNode) {
+        TreeNode newRootNode = treeNode.getLeftChild();
+        treeNode.setLeftChild(newRootNode.getRightChild());
+        newRootNode.setRightChild(treeNode);
+
+        updateHeight(treeNode);
+        updateHeight(newRootNode);
+
+        return newRootNode;
+    }
+
     public boolean delete(int key) {
         validateKey(key);
 
