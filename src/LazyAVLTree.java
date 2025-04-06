@@ -227,12 +227,14 @@ public class LazyAVLTree {
         private TreeNode leftChild;
         private TreeNode rightChild;
         private boolean deleted;
+        private int height;
 
         TreeNode(int key) {
             this.key = key;
             this.leftChild = null;
             this.rightChild = null;
             this.deleted = false;
+            this.height = 0;
         }
 
         public int getKey() {
@@ -269,6 +271,14 @@ public class LazyAVLTree {
 
         public void undelete() {
             deleted = false;
+        }
+
+        public int getHeight() {
+            return this.height;
+        }
+
+        public void setHeight(int height) {
+            this.height = height;
         }
     }
 }
