@@ -329,12 +329,42 @@ public class LazyAVLTree {
         }
     }
 
+
+    @Override
     public String toString() {
-        return "";
+        StringBuilder builder = new StringBuilder();
+
+        preOrderToString(this.root, builder);
+
+        return builder.toString().trim();
+    }
+
+    // Must be pre-order traversal in this exact order:
+    // 1) Check the current node and print the value.
+    // 2) Traverse the left subtree.
+    // 3) Traverse the right subtree.
+    // E.g. if root node 45 has left child 30 and right child 47,
+    // 30 has left child 2 and right child 5 (deleted), 47 has
+    // right child 50, 50 has right child 60 (deleted) then the
+    // pre-order traversal output is 45 30 2 *5 47 50 *60.
+    private void preOrderToString(TreeNode treeNode, StringBuilder builder) {
+        if (treeNode == null) {
+            return;
+        }
+
+        // Soft deleted keys are still printed but with a prepended asterisk.
+        if (treeNode.isDeleted()) {
+            builder.append("*");
+        }
+
+        builder.append(treeNode.getKey()).append(" ");
+
+        preOrderToString(treeNode.getLeftChild(), builder);
+        preOrderToString(treeNode.getRightChild(), builder);
     }
 
     private static class TreeNode {
-        private int key;
+        private final int key;
         private TreeNode parent;
         private TreeNode leftChild;
         private TreeNode rightChild;
