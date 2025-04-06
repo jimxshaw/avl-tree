@@ -104,6 +104,8 @@ public class LazyAVLTree {
             treeNode = treeNode.getParent();
         }
 
+        // Reaching the end of this method means the new node has been
+        // successfully inserted and isInserted will always be true.
         return isInserted;
     }
 
@@ -122,27 +124,68 @@ public class LazyAVLTree {
         return leftChildHeight - rightChildHeight;
     }
 
-    private TreeNode rotateLeft(TreeNode treeNode) {
-        TreeNode newRootNode = treeNode.getRightChild();
-        treeNode.setRightChild(newRootNode.getLeftChild());
-        newRootNode.setLeftChild(treeNode);
+    private TreeNode rotateLeft(TreeNode oldRootNode) {
+        // The right child becomes the new root of this subtree.
+        TreeNode newRootNode = oldRootNode.getRightChild();
+        // This is the subtree that will be orphaned during rotation.
+        TreeNode orphanSubtree = newRootNode.getLeftChild();
 
-        updateHeight(treeNode);
+        // Execute rotation.
+        // The old root becomes left child of the new root.
+        newRootNode.setLeftChild(oldRootNode);
+        // Attach the orphaned subtree as the old root's right child.
+        oldRootNode.setRightChild(orphanSubtree);
+
+        // Update the parent pointers.
+        // The new root adopts the old root's parent.
+        newRootNode.setParent(oldRootNode.getParent());
+        // The old root becomes the child of new root.
+        oldRootNode.setParent(newRootNode);
+
+        if (orphanSubtree != null) {
+            // The orphan subtree now has oldRootNode as its parent.
+            orphanSubtree.setParent(oldRootNode);
+        }
+
+        // Update heights after rotation.
+        updateHeight(oldRootNode);
         updateHeight(newRootNode);
 
+        // This is now the root of this subtree.
         return newRootNode;
     }
 
-    private TreeNode rotateRight(TreeNode treeNode) {
-        TreeNode newRootNode = treeNode.getLeftChild();
-        treeNode.setLeftChild(newRootNode.getRightChild());
-        newRootNode.setRightChild(treeNode);
+    private TreeNode rotateRight(TreeNode oldRootNode) {
+        // The left child becomes the new root of this subtree.
+        TreeNode newRootNode = oldRootNode.getLeftChild();
+        // This is the subtree that will be orphaned during rotation.
+        TreeNode orphanSubtree = newRootNode.getRightChild();
 
-        updateHeight(treeNode);
+        // Execute rotation.
+        // The old root becomes the right child of new root.
+        newRootNode.setRightChild(oldRootNode);
+        // Attach the orphaned subtree as the old root's left child.
+        oldRootNode.setLeftChild(orphanSubtree);
+
+        // Update parent pointers.
+        // The new root adopts the old root's parent.
+        newRootNode.setParent(oldRootNode.getParent());
+        // The old root becomes the child of new root.
+        oldRootNode.setParent(newRootNode);
+
+        // The orphan subtree now has oldRootNode as its parent.
+        if (orphanSubtree != null) {
+            orphanSubtree.setParent(oldRootNode);
+        }
+
+        // Update heights after rotation.
+        updateHeight(oldRootNode);
         updateHeight(newRootNode);
 
+        // This is now the root of this subtree.
         return newRootNode;
     }
+
 
     public boolean delete(int key) {
         validateKey(key);
