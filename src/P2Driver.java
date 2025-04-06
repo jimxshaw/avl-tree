@@ -1,13 +1,104 @@
+import java.io.File;
+import java.io.PrintWriter;
+import java.util.*;
+
 public class P2Driver {
     public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
+        if (args.length != 2) {
+            System.out.print("Error Incorrect Arguments:" + Arrays.toString(args));
+            System.exit(0);
+        }
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
+        try {
+            File inputFile = new File(args[0]);
+            File outputFile = new File(args[1]);
+
+            Scanner scanner = new Scanner(inputFile);
+            PrintWriter writer = new PrintWriter(outputFile);
+
+            LazyAVLTree tree = new LazyAVLTree();
+
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine().trim();
+
+                // Find out the command.
+                // E.g. Insert, Delete, Contains, etc.
+                String command = line.contains(":") ? line.substring(0, line.indexOf(":")) : line;
+
+                switch (command) {
+                    case "Insert":
+                        try {
+                            int key = Integer.parseInt(line.substring(line.indexOf(":") + 1));
+                            boolean result = tree.insert(key);
+                            writer.println(result + " " + tree.getLastRotationType());
+                        }
+                        catch (NumberFormatException e) {
+                            writer.println("Error in Line: " + line);
+                        }
+                        catch (IllegalArgumentException e) {
+                            writer.println("Error in insert: IllegalArgumentException raised");
+                        }
+                        break;
+
+                    case "Delete":
+                        try {
+                            int key = Integer.parseInt(line.substring(line.indexOf(":") + 1));
+                            boolean result = tree.delete(key);
+                            writer.println(result);
+                        }
+                        catch (NumberFormatException e) {
+                            writer.println("Error in Line: " + line);
+                        }
+                        catch (Exception e) {
+                            writer.println("Error in delete: IllegalArgumentException raised");
+                        }
+                        break;
+
+                    case "Contains":
+                        try {
+                            int key = Integer.parseInt(line.substring(line.indexOf(":") + 1));
+                            boolean result = tree.contains(key);
+                            writer.println(result);
+                        }
+                        catch (NumberFormatException e) {
+                            writer.println("Error in Line: " + line);
+                        }
+                        catch (Exception e) {
+                            writer.println("Error in contains: IllegalArgumentException raised");
+                        }
+                        break;
+
+                    case "FindMin":
+                        writer.println(tree.findMin());
+                        break;
+
+                    case "FindMax":
+                        writer.println(tree.findMax());
+                        break;
+
+                    case "PrintTree":
+                        // Java's println implicitly calls obj.toString()
+                        // so writing tree.toString() would be redundant.
+                        writer.println(tree);
+                        break;
+
+                    case "Height":
+                        writer.println(tree.height());
+                        break;
+
+                    case "Size":
+                        writer.println(tree.size());
+                        break;
+
+                    default:
+                        writer.println("Error in Line: " + line);
+                        break;
+                }
+
+            }
+        }
+        catch (Exception e) {
+            System.err.println("Error occurred while processing the files: " + e.getMessage());
         }
     }
 }
