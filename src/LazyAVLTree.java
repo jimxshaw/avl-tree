@@ -1,7 +1,12 @@
 public class LazyAVLTree {
     private TreeNode root;
+
     private static final int KEY_LOWER_LIMIT = 1;
     private static final int KEY_UPPER_LIMIT = 99;
+
+    private static final String NO_ROTATION = "NoRotation";
+    private static final String SINGLE_ROTATION = "SingleRotation";
+    private static final String DOUBLE_ROTATION = "DoubleRotation";
 
     public LazyAVLTree() {
         this.root = null;
@@ -73,6 +78,9 @@ public class LazyAVLTree {
         // Begin from the parent node of the newly inserted/re-activated node.
         TreeNode treeNode = parentNode;
 
+        // No Rotation is the default.
+        String rotationType = NO_ROTATION;
+
         while (treeNode != null) {
             updateHeight(treeNode);
             int balance = getBalance(treeNode);
@@ -80,29 +88,34 @@ public class LazyAVLTree {
             // Heavy on the left side.
             if (balance > 1) {
                 if (key < treeNode.getLeftChild().getKey()) {
-                    // Single rotation.
                     treeNode = rotateRight(treeNode);
+                    rotationType = SINGLE_ROTATION;
                 }
                 else {
                     treeNode.setLeftChild(rotateLeft(treeNode.getLeftChild()));
                     treeNode = rotateRight(treeNode);
+                    rotationType = DOUBLE_ROTATION;
                 }
             }
             // Heavy on the right side.
             else if (balance < -1) {
                 if (key > treeNode.getRightChild().getKey()) {
-                    // Single rotation.
                     treeNode = rotateLeft(treeNode);
+                    rotationType = SINGLE_ROTATION;
                 }
                 else {
                     treeNode.setRightChild(rotateRight(treeNode.getRightChild()));
                     treeNode = rotateLeft(treeNode);
+                    rotationType = DOUBLE_ROTATION;
                 }
             }
 
             // Re-balance by moving back up the tree.
             treeNode = treeNode.getParent();
         }
+
+        // Print Rotation Type.
+        System.out.println(rotationType);
 
         // Reaching the end of this method means the new node has been
         // successfully inserted and isInserted will always be true.
