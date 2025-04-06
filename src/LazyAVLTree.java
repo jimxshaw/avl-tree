@@ -11,18 +11,184 @@ public class LazyAVLTree {
         return this.root;
     }
 
-    private void setRoot(TreeNode newRoot) {
-        root = newRoot;
+    private void setRoot(TreeNode newRootNode) {
+        root = newRootNode;
     }
 
-    public boolean insert(int key) throws IllegalArgumentException {
-        return false;
+    public boolean insert(int key) {
+        // Part A: make sure the key is within range.
+        validateKey(key);
+
+        // Part B: Insert the new node or re-activate the deleted node.
+        TreeNode currentNode = root;
+        TreeNode parentNode = null;
+        boolean isInserted = false;
+
+        while (currentNode != null) {
+            parentNode = currentNode;
+
+            if (key < currentNode.getKey()) {
+                currentNode = currentNode.getLeftChild();
+            }
+            else if (key > currentNode.getKey()) {
+                currentNode = currentNode.getRightChild();
+            }
+            else {
+                // Getting here means the key already exists.
+                // If the key is deleted then re-activate it.
+                if (currentNode.isDeleted()) {
+                    currentNode.undelete();
+                    isInserted = true;
+                }
+
+                // Should return false if the key
+                // exists and is active.
+                return isInserted;
+            }
+        }
+
+        // If the current node is null then we have reached a Leaf node
+        // and should insert the node here.
+        TreeNode newTreeNode = new TreeNode(key);
+
+        // If the new node has no parent then it must be the root.
+        // By AVL rules, if the key is smaller than the parent's key
+        // then the new node must be inserted to the parent's left.
+        // If the key is larger than the parent's key then the new node
+        // must be inserted to the parent's right.
+        if (parentNode == null) {
+            this.setRoot(newTreeNode);
+        }
+        else if (key < parentNode.getKey()) {
+            parentNode.setLeftChild(newTreeNode);
+        }
+        else {
+            parentNode.setRightChild(newTreeNode);
+        }
+
+        // Mark that a new node has been successfully inserted.
+        isInserted = true;
+
+        // Part C: Re-balance the tree and deal with rotations.
+        // Begin from the parent node of the newly inserted/re-activated node.
+        TreeNode treeNode = parentNode;
+
+        while (treeNode != null) {
+            updateHeight(treeNode);
+            int balance = getBalance(treeNode);
+
+            // Heavy on the left side.
+            if (balance > 1) {
+                if (key < treeNode.getLeftChild().getKey()) {
+                    // Single rotation.
+                    treeNode = rotateRight(treeNode);
+                }
+                else {
+                    treeNode.setLeftChild(rotateLeft(treeNode.getLeftChild()));
+                    treeNode = rotateRight(treeNode);
+                }
+            }
+            // Heavy on the right side.
+            else if (balance < -1) {
+                if (key > treeNode.getRightChild().getKey()) {
+                    // Single rotation.
+                    treeNode = rotateLeft(treeNode);
+                }
+                else {
+                    treeNode.setRightChild(rotateRight(treeNode.getRightChild()));
+                    treeNode = rotateLeft(treeNode);
+                }
+            }
+
+            // Re-balance by moving back up the tree.
+            treeNode = treeNode.getParent();
+        }
+
+        // Reaching the end of this method means the new node has been
+        // successfully inserted and isInserted will always be true.
+        return isInserted;
     }
+
+    private void updateHeight(TreeNode treeNode) {
+        int leftChildHeight = (treeNode.getLeftChild() != null) ? treeNode.getLeftChild().getHeight() : -1;
+        int rightChildHeight = (treeNode.getRightChild() != null) ? treeNode.getRightChild().getHeight() : -1;
+
+        treeNode.setHeight(1 + Math.max(leftChildHeight, rightChildHeight));
+    }
+
+    // According to AVL definition, for every tree node x: -1 <= getBalance(x) <= 1.
+    private int getBalance(TreeNode treeNode) {
+        int leftChildHeight = (treeNode.getLeftChild() != null) ? treeNode.getLeftChild().getHeight() : -1;
+        int rightChildHeight = (treeNode.getRightChild() != null) ? treeNode.getRightChild().getHeight() : -1;
+
+        return leftChildHeight - rightChildHeight;
+    }
+
+    private TreeNode rotateLeft(TreeNode oldRootNode) {
+        // The right child becomes the new root of this subtree.
+        TreeNode newRootNode = oldRootNode.getRightChild();
+        // This is the subtree that will be orphaned during rotation.
+        TreeNode orphanSubtree = newRootNode.getLeftChild();
+
+        // Execute rotation.
+        // The old root becomes left child of the new root.
+        newRootNode.setLeftChild(oldRootNode);
+        // Attach the orphaned subtree as the old root's right child.
+        oldRootNode.setRightChild(orphanSubtree);
+
+        // Update the parent pointers.
+        // The new root adopts the old root's parent.
+        newRootNode.setParent(oldRootNode.getParent());
+        // The old root becomes the child of new root.
+        oldRootNode.setParent(newRootNode);
+
+        if (orphanSubtree != null) {
+            // The orphan subtree now has oldRootNode as its parent.
+            orphanSubtree.setParent(oldRootNode);
+        }
+
+        // Update heights after rotation.
+        updateHeight(oldRootNode);
+        updateHeight(newRootNode);
+
+        // This is now the root of this subtree.
+        return newRootNode;
+    }
+
+    private TreeNode rotateRight(TreeNode oldRootNode) {
+        // The left child becomes the new root of this subtree.
+        TreeNode newRootNode = oldRootNode.getLeftChild();
+        // This is the subtree that will be orphaned during rotation.
+        TreeNode orphanSubtree = newRootNode.getRightChild();
+
+        // Execute rotation.
+        // The old root becomes the right child of new root.
+        newRootNode.setRightChild(oldRootNode);
+        // Attach the orphaned subtree as the old root's left child.
+        oldRootNode.setLeftChild(orphanSubtree);
+
+        // Update parent pointers.
+        // The new root adopts the old root's parent.
+        newRootNode.setParent(oldRootNode.getParent());
+        // The old root becomes the child of new root.
+        oldRootNode.setParent(newRootNode);
+
+        // The orphan subtree now has oldRootNode as its parent.
+        if (orphanSubtree != null) {
+            orphanSubtree.setParent(oldRootNode);
+        }
+
+        // Update heights after rotation.
+        updateHeight(oldRootNode);
+        updateHeight(newRootNode);
+
+        // This is now the root of this subtree.
+        return newRootNode;
+    }
+
 
     public boolean delete(int key) {
-        if (key < KEY_LOWER_LIMIT || key > KEY_UPPER_LIMIT) {
-            throw new IllegalArgumentException("Key must be between " + KEY_LOWER_LIMIT + " and " + KEY_UPPER_LIMIT);
-        }
+        validateKey(key);
 
         TreeNode treeNode = findTreeNode(key);
 
@@ -39,9 +205,7 @@ public class LazyAVLTree {
     }
 
     public boolean contains(int key) {
-        if (key < KEY_LOWER_LIMIT || key > KEY_UPPER_LIMIT) {
-            throw new IllegalArgumentException("Key must be between " + KEY_LOWER_LIMIT + " and " + KEY_UPPER_LIMIT);
-        }
+        validateKey(key);
 
         TreeNode treeNode = findTreeNode(key);
 
@@ -72,6 +236,12 @@ public class LazyAVLTree {
 
         // Node not found.
         return null;
+    }
+
+    private static void validateKey(int key) {
+        if (key < KEY_LOWER_LIMIT || key > KEY_UPPER_LIMIT) {
+            throw new IllegalArgumentException("Key must be between " + KEY_LOWER_LIMIT + " and " + KEY_UPPER_LIMIT);
+        }
     }
 
     // AVLs are BSTs so the max value is always the very right-most tree node.
@@ -123,9 +293,9 @@ public class LazyAVLTree {
     }
 
     private int height(TreeNode treeNode) {
-        // Empty tree has the lowest integer for height.
+        // Empty tree has -1 for height by definition.
         if (treeNode == null) {
-            return Integer.MIN_VALUE;
+            return -1;
         }
 
         try {
@@ -137,7 +307,7 @@ public class LazyAVLTree {
         }
         catch(StackOverflowError e) {
             System.err.println("Stack Overflow: Tree is too deep: " + e);
-            return Integer.MIN_VALUE;
+            return -1;
         }
     }
 
@@ -159,29 +329,67 @@ public class LazyAVLTree {
         }
     }
 
+
+    @Override
     public String toString() {
-        return "";
+        StringBuilder builder = new StringBuilder();
+
+        preOrderToString(this.root, builder);
+
+        return builder.toString().trim();
+    }
+
+    // Must be pre-order traversal in this exact order:
+    // 1) Check the current node and print the value.
+    // 2) Traverse the left subtree.
+    // 3) Traverse the right subtree.
+    // E.g. if root node 45 has left child 30 and right child 47,
+    // 30 has left child 2 and right child 5 (deleted), 47 has
+    // right child 50, 50 has right child 60 (deleted) then the
+    // pre-order traversal output is 45 30 2 *5 47 50 *60.
+    private void preOrderToString(TreeNode treeNode, StringBuilder builder) {
+        if (treeNode == null) {
+            return;
+        }
+
+        // Soft deleted keys are still printed but with a prepended asterisk.
+        if (treeNode.isDeleted()) {
+            builder.append("*");
+        }
+
+        builder.append(treeNode.getKey()).append(" ");
+
+        preOrderToString(treeNode.getLeftChild(), builder);
+        preOrderToString(treeNode.getRightChild(), builder);
     }
 
     private static class TreeNode {
-        private int key;
+        private final int key;
+        private TreeNode parent;
         private TreeNode leftChild;
         private TreeNode rightChild;
         private boolean deleted;
+        private int height;
 
         TreeNode(int key) {
             this.key = key;
+            this.parent = null;
             this.leftChild = null;
             this.rightChild = null;
             this.deleted = false;
+            this.height = 0;
         }
 
         public int getKey() {
             return this.key;
         }
 
-        public void setKey(int newKey) {
-            key = newKey;
+        public TreeNode getParent() {
+            return parent;
+        }
+
+        public void setParent(TreeNode parent) {
+            this.parent = parent;
         }
 
         public TreeNode getLeftChild() {
@@ -190,6 +398,10 @@ public class LazyAVLTree {
 
         public void setLeftChild(TreeNode newLeftChild) {
             leftChild = newLeftChild;
+
+            if (leftChild != null) {
+                leftChild.setParent(this);
+            }
         }
 
         public TreeNode getRightChild() {
@@ -198,6 +410,10 @@ public class LazyAVLTree {
 
         public void setRightChild(TreeNode newRightChild) {
             rightChild = newRightChild;
+
+            if (rightChild != null) {
+                rightChild.setParent(this);
+            }
         }
 
         public boolean isDeleted() {
@@ -210,6 +426,14 @@ public class LazyAVLTree {
 
         public void undelete() {
             deleted = false;
+        }
+
+        public int getHeight() {
+            return this.height;
+        }
+
+        public void setHeight(int height) {
+            this.height = height;
         }
     }
 }
