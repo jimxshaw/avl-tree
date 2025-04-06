@@ -70,8 +70,39 @@ public class LazyAVLTree {
         isInserted = true;
 
         // Part C: Re-balance the tree and deal with rotations.
+        // Begin from the parent node of the newly inserted/re-activated node.
+        TreeNode treeNode = parentNode;
 
+        while (treeNode != null) {
+            updateHeight(treeNode);
+            int balance = getBalance(treeNode);
 
+            // Heavy on the left side.
+            if (balance > 1) {
+                if (key < treeNode.getLeftChild().getKey()) {
+                    // Single rotation.
+                    treeNode = rotateRight(treeNode);
+                }
+                else {
+                    treeNode.setLeftChild(rotateLeft(treeNode.getLeftChild()));
+                    treeNode = rotateRight(treeNode);
+                }
+            }
+            // Heavy on the right side.
+            else if (balance < -1) {
+                if (key > treeNode.getRightChild().getKey()) {
+                    // Single rotation.
+                    treeNode = rotateLeft(treeNode);
+                }
+                else {
+                    treeNode.setRightChild(rotateRight(treeNode.getRightChild()));
+                    treeNode = rotateLeft(treeNode);
+                }
+            }
+
+            // Re-balance by moving back up the tree.
+            treeNode = treeNode.getParent();
+        }
 
         return isInserted;
     }
@@ -261,6 +292,7 @@ public class LazyAVLTree {
 
     private static class TreeNode {
         private int key;
+        private TreeNode parent;
         private TreeNode leftChild;
         private TreeNode rightChild;
         private boolean deleted;
@@ -268,6 +300,7 @@ public class LazyAVLTree {
 
         TreeNode(int key) {
             this.key = key;
+            this.parent = null;
             this.leftChild = null;
             this.rightChild = null;
             this.deleted = false;
@@ -282,12 +315,24 @@ public class LazyAVLTree {
             key = newKey;
         }
 
+        public TreeNode getParent() {
+            return parent;
+        }
+
+        public void setParent(TreeNode parent) {
+            this.parent = parent;
+        }
+
         public TreeNode getLeftChild() {
             return this.leftChild;
         }
 
         public void setLeftChild(TreeNode newLeftChild) {
             leftChild = newLeftChild;
+
+            if (leftChild != null) {
+                leftChild.setParent(this);
+            }
         }
 
         public TreeNode getRightChild() {
@@ -296,6 +341,10 @@ public class LazyAVLTree {
 
         public void setRightChild(TreeNode newRightChild) {
             rightChild = newRightChild;
+
+            if (rightChild != null) {
+                rightChild.setParent(this);
+            }
         }
 
         public boolean isDeleted() {
