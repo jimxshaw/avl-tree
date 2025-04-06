@@ -76,6 +76,21 @@ public class LazyAVLTree {
         return isInserted;
     }
 
+    private void updateHeight(TreeNode treeNode) {
+        int leftChildHeight = (treeNode.getLeftChild() != null) ? treeNode.getLeftChild().getHeight() : -1;
+        int rightChildHeight = (treeNode.getRightChild() != null) ? treeNode.getRightChild().getHeight() : -1;
+
+        treeNode.setHeight(1 + Math.max(leftChildHeight, rightChildHeight));
+    }
+
+    // According to AVL definition, for every tree node x: -1 <= getBalance(x) <= 1.
+    private int getBalance(TreeNode treeNode) {
+        int leftChildHeight = (treeNode.getLeftChild() != null) ? treeNode.getLeftChild().getHeight() : -1;
+        int rightChildHeight = (treeNode.getRightChild() != null) ? treeNode.getRightChild().getHeight() : -1;
+
+        return leftChildHeight - rightChildHeight;
+    }
+
     public boolean delete(int key) {
         validateKey(key);
 
