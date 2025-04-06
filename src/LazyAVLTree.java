@@ -11,8 +11,8 @@ public class LazyAVLTree {
         return this.root;
     }
 
-    private void setRoot(TreeNode newRoot) {
-        root = newRoot;
+    private void setRoot(TreeNode newRootNode) {
+        root = newRootNode;
     }
 
     public boolean insert(int key) {
