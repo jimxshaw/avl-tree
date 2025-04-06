@@ -26,9 +26,72 @@ public class P2Driver {
                 String command = line.contains(":") ? line.substring(0, line.indexOf(":")) : line;
 
                 switch (command) {
+                    case "Insert":
+                        try {
+                            int key = Integer.parseInt(line.substring(line.indexOf(":") + 1));
+                            boolean result = tree.insert(key);
+                            writer.println(result + " " + tree.getLastRotationType());
+                        }
+                        catch (NumberFormatException e) {
+                            writer.println("Error in Line: " + line);
+                        }
+                        catch (IllegalArgumentException e) {
+                            writer.println("Error in insert: IllegalArgumentException raised");
+                        }
+                        break;
+
+                    case "Delete":
+                        try {
+                            int key = Integer.parseInt(line.substring(line.indexOf(":") + 1));
+                            boolean result = tree.delete(key);
+                            writer.println(result);
+                        }
+                        catch (NumberFormatException e) {
+                            writer.println("Error in Line: " + line);
+                        }
+                        catch (Exception e) {
+                            writer.println("Error in delete: IllegalArgumentException raised");
+                        }
+                        break;
+
+                    case "Contains":
+                        try {
+                            int key = Integer.parseInt(line.substring(line.indexOf(":") + 1));
+                            boolean result = tree.contains(key);
+                            writer.println(result);
+                        }
+                        catch (NumberFormatException e) {
+                            writer.println("Error in Line: " + line);
+                        }
+                        catch (Exception e) {
+                            writer.println("Error in contains: IllegalArgumentException raised");
+                        }
+                        break;
+
+                    case "FindMin":
+                        writer.println(tree.findMin());
+                        break;
+
+                    case "FindMax":
+                        writer.println(tree.findMax());
+                        break;
+
+                    case "PrintTree":
+                        // Java's println implicitly calls obj.toString()
+                        // so writing tree.toString() would be redundant.
+                        writer.println(tree);
+                        break;
+
+                    case "Height":
+                        writer.println(tree.height());
+                        break;
+
+                    case "Size":
+                        writer.println(tree.size());
+                        break;
 
                     default:
-                        writer.println("Error with line: " + line);
+                        writer.println("Error in Line: " + line);
                         break;
                 }
 
