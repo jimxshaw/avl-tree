@@ -9,7 +9,7 @@ False
 55
 98
 67 55 *45 98
-2
+3
 4
 True NoRotation
 True SingleRotation

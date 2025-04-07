@@ -282,7 +282,7 @@ public class LazyAVLTree {
     private int height(TreeNode treeNode) {
         // Empty tree has -1 for height by definition.
         if (treeNode == null) {
-            return -1;
+            return 0;
         }
 
         try {
