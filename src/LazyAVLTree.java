@@ -34,6 +34,7 @@ public class LazyAVLTree {
     private TreeNode insert(int key, TreeNode treeNode) {
         if (treeNode == null) {
             this.isInsertSuccessful = true;
+            this.lastRotationType = NO_ROTATION;
             return new TreeNode(key, null, null);
         }
 
