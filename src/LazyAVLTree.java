@@ -29,108 +29,12 @@ public class LazyAVLTree {
         // Part A: make sure the key is within range.
         validateKey(key);
 
-        // Part B: Insert the new node or re-activate the deleted node.
-        TreeNode currentNode = root;
-        TreeNode parentNode = null;
-        boolean isInserted = false;
 
-        while (currentNode != null) {
-            parentNode = currentNode;
-
-            if (key < currentNode.getKey()) {
-                currentNode = currentNode.getLeftChild();
-            }
-            else if (key > currentNode.getKey()) {
-                currentNode = currentNode.getRightChild();
-            }
-            else {
-                // Getting here means the key already exists.
-                // If the key is deleted then re-activate it.
-                if (currentNode.isDeleted()) {
-                    currentNode.undelete();
-                    isInserted = true;
-
-                    this.lastRotationType = NO_ROTATION;
-                }
-
-                // Should return false if the key
-                // exists and is active.
-                return isInserted;
-            }
-        }
-
-        // If the current node is null then we have reached a Leaf node
-        // and should insert the node here.
-        TreeNode newTreeNode = new TreeNode(key);
-
-        // If the new node has no parent then it must be the root.
-        // By AVL rules, if the key is smaller than the parent's key
-        // then the new node must be inserted to the parent's left.
-        // If the key is larger than the parent's key then the new node
-        // must be inserted to the parent's right.
-        if (parentNode == null) {
-            this.setRoot(newTreeNode);
-        }
-        else if (key < parentNode.getKey()) {
-            parentNode.setLeftChild(newTreeNode);
-        }
-        else {
-            parentNode.setRightChild(newTreeNode);
-        }
-
-        // Mark that a new node has been successfully inserted.
-        isInserted = true;
-
-        // Part C: Re-balance the tree and deal with rotations.
-        // Begin from the parent node of the newly inserted/re-activated node.
-        TreeNode treeNode = parentNode;
-
-        // No Rotation is the default.
-        this.lastRotationType = NO_ROTATION;
-
-        while (treeNode != null) {
-            updateHeight(treeNode);
-            int balance = getBalance(treeNode);
-
-            // Heavy on the left side.
-            if (balance > 1) {
-                if (key < treeNode.getLeftChild().getKey()) {
-                    treeNode = rotateRight(treeNode);
-                    this.lastRotationType = SINGLE_ROTATION;
-                }
-                else {
-                    treeNode.setLeftChild(rotateLeft(treeNode.getLeftChild()));
-                    treeNode = rotateRight(treeNode);
-                    this.lastRotationType = DOUBLE_ROTATION;
-                }
-            }
-            // Heavy on the right side.
-            else if (balance < -1) {
-                if (key > treeNode.getRightChild().getKey()) {
-                    treeNode = rotateLeft(treeNode);
-                    this.lastRotationType = SINGLE_ROTATION;
-                }
-                else {
-                    treeNode.setRightChild(rotateRight(treeNode.getRightChild()));
-                    treeNode = rotateLeft(treeNode);
-                    this.lastRotationType = DOUBLE_ROTATION;
-                }
-            }
-
-            // Re-balance by moving back up the tree.
-            treeNode = treeNode.getParent();
-        }
-
-        // Reaching the end of this method means the new node has been
-        // successfully inserted and isInserted will always be true.
-        return isInserted;
     }
 
-    private void updateHeight(TreeNode treeNode) {
-        int leftChildHeight = (treeNode.getLeftChild() != null) ? treeNode.getLeftChild().getHeight() : -1;
-        int rightChildHeight = (treeNode.getRightChild() != null) ? treeNode.getRightChild().getHeight() : -1;
-
-        treeNode.setHeight(1 + Math.max(leftChildHeight, rightChildHeight));
+    // Returns the height of the node or -1 if null.
+    private int getHeight(TreeNode treeNode) {
+        return treeNode == null ? -1 : treeNode.getHeight();
     }
 
     // According to AVL definition, for every tree node x: -1 <= getBalance(x) <= 1.
@@ -142,65 +46,11 @@ public class LazyAVLTree {
     }
 
     private TreeNode rotateLeft(TreeNode oldRootNode) {
-        // The right child becomes the new root of this subtree.
-        TreeNode newRootNode = oldRootNode.getRightChild();
-        // This is the subtree that will be orphaned during rotation.
-        TreeNode orphanSubtree = newRootNode.getLeftChild();
 
-        // Execute rotation.
-        // The old root becomes left child of the new root.
-        newRootNode.setLeftChild(oldRootNode);
-        // Attach the orphaned subtree as the old root's right child.
-        oldRootNode.setRightChild(orphanSubtree);
-
-        // Update the parent pointers.
-        // The new root adopts the old root's parent.
-        newRootNode.setParent(oldRootNode.getParent());
-        // The old root becomes the child of new root.
-        oldRootNode.setParent(newRootNode);
-
-        if (orphanSubtree != null) {
-            // The orphan subtree now has oldRootNode as its parent.
-            orphanSubtree.setParent(oldRootNode);
-        }
-
-        // Update heights after rotation.
-        updateHeight(oldRootNode);
-        updateHeight(newRootNode);
-
-        // This is now the root of this subtree.
-        return newRootNode;
     }
 
     private TreeNode rotateRight(TreeNode oldRootNode) {
-        // The left child becomes the new root of this subtree.
-        TreeNode newRootNode = oldRootNode.getLeftChild();
-        // This is the subtree that will be orphaned during rotation.
-        TreeNode orphanSubtree = newRootNode.getRightChild();
 
-        // Execute rotation.
-        // The old root becomes the right child of new root.
-        newRootNode.setRightChild(oldRootNode);
-        // Attach the orphaned subtree as the old root's left child.
-        oldRootNode.setLeftChild(orphanSubtree);
-
-        // Update parent pointers.
-        // The new root adopts the old root's parent.
-        newRootNode.setParent(oldRootNode.getParent());
-        // The old root becomes the child of new root.
-        oldRootNode.setParent(newRootNode);
-
-        // The orphan subtree now has oldRootNode as its parent.
-        if (orphanSubtree != null) {
-            orphanSubtree.setParent(oldRootNode);
-        }
-
-        // Update heights after rotation.
-        updateHeight(oldRootNode);
-        updateHeight(newRootNode);
-
-        // This is now the root of this subtree.
-        return newRootNode;
     }
 
 
@@ -382,7 +232,6 @@ public class LazyAVLTree {
 
     private static class TreeNode {
         private final int key;
-        private TreeNode parent;
         private TreeNode leftChild;
         private TreeNode rightChild;
         private boolean deleted;
@@ -390,9 +239,16 @@ public class LazyAVLTree {
 
         TreeNode(int key) {
             this.key = key;
-            this.parent = null;
             this.leftChild = null;
             this.rightChild = null;
+            this.deleted = false;
+            this.height = 0;
+        }
+
+        TreeNode(int key, TreeNode leftChild, TreeNode rightChild) {
+            this.key = key;
+            this.leftChild = leftChild;
+            this.rightChild = rightChild;
             this.deleted = false;
             this.height = 0;
         }
@@ -401,24 +257,12 @@ public class LazyAVLTree {
             return this.key;
         }
 
-        public TreeNode getParent() {
-            return parent;
-        }
-
-        public void setParent(TreeNode parent) {
-            this.parent = parent;
-        }
-
         public TreeNode getLeftChild() {
             return this.leftChild;
         }
 
         public void setLeftChild(TreeNode newLeftChild) {
             leftChild = newLeftChild;
-
-            if (leftChild != null) {
-                leftChild.setParent(this);
-            }
         }
 
         public TreeNode getRightChild() {
@@ -427,10 +271,6 @@ public class LazyAVLTree {
 
         public void setRightChild(TreeNode newRightChild) {
             rightChild = newRightChild;
-
-            if (rightChild != null) {
-                rightChild.setParent(this);
-            }
         }
 
         public boolean isDeleted() {

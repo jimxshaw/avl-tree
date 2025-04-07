@@ -29,8 +29,12 @@ public class P2Driver {
                     case "Insert":
                         try {
                             int key = Integer.parseInt(line.substring(line.indexOf(":") + 1));
-                            boolean result = tree.insert(key);
-                            writer.println(result + " " + tree.getLastRotationType());
+
+                            String result = tree.insert(key) ? "True" : "False";
+
+                            String lastRotationType = tree.getLastRotationType();
+
+                            writer.println(result + " " + lastRotationType);
                         }
                         catch (NumberFormatException e) {
                             writer.println("Error in Line: " + line);
@@ -43,7 +47,7 @@ public class P2Driver {
                     case "Delete":
                         try {
                             int key = Integer.parseInt(line.substring(line.indexOf(":") + 1));
-                            boolean result = tree.delete(key);
+                            String result = tree.delete(key) ? "True" : "False";
                             writer.println(result);
                         }
                         catch (NumberFormatException e) {
@@ -57,7 +61,7 @@ public class P2Driver {
                     case "Contains":
                         try {
                             int key = Integer.parseInt(line.substring(line.indexOf(":") + 1));
-                            boolean result = tree.contains(key);
+                            String result = tree.contains(key) ? "True" : "False";
                             writer.println(result);
                         }
                         catch (NumberFormatException e) {
@@ -96,9 +100,12 @@ public class P2Driver {
                 }
 
             }
+
+            scanner.close();
+            writer.close();
         }
         catch (Exception e) {
-            System.err.println("Error occurred while processing the files: " + e.getMessage());
+            System.out.println("Exception: " + e.getMessage());
         }
     }
 }
