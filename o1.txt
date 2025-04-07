@@ -14,7 +14,8 @@ False
 True NoRotation
 True SingleRotation
 Error in insert: IllegalArgumentException raised
-67 *45 32 55 98 84
+True DoubleRotation
+67 *45 32 55 90 84 98
 Error in insert: IllegalArgumentException raised
 Error in Line: Insert
 Error in Line: hih
