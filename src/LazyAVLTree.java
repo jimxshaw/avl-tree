@@ -73,39 +73,58 @@ public class LazyAVLTree {
             return null;
         }
 
-        if (getSubTreeHeight(treeNode.getLeftChild()) - getSubTreeHeight(treeNode.getRightChild()) > ALLOWED_IMBALANCE) {
-            if (getSubTreeHeight(treeNode.getLeftChild().getLeftChild()) >= getSubTreeHeight(treeNode.getLeftChild().getRightChild())) {
+        int leftHeight = getSubTreeHeight(treeNode.getLeftChild());
+        int rightHeight = getSubTreeHeight(treeNode.getRightChild());
+
+        // Left imbalance: left subtree too tall.
+        if (leftHeight - rightHeight > ALLOWED_IMBALANCE) {
+            TreeNode leftChild = treeNode.getLeftChild();
+
+            // Left-Left: single right rotation.
+            if (getSubTreeHeight(leftChild.getLeftChild()) >= getSubTreeHeight(leftChild.getRightChild())) {
                 treeNode = rotateWithLeftChild(treeNode);
                 this.lastRotationType = SINGLE_ROTATION;
             }
+            // Left-Right: double rotation (left then right).
             else {
                 treeNode = doubleRotateWithLeftChild(treeNode);
                 this.lastRotationType = DOUBLE_ROTATION;
             }
         }
-        else if (getSubTreeHeight(treeNode.getRightChild()) - getSubTreeHeight(treeNode.getLeftChild()) > ALLOWED_IMBALANCE) {
-            if (getSubTreeHeight(treeNode.getRightChild().getRightChild()) >= getSubTreeHeight(treeNode.getRightChild().getLeftChild())) {
+        // Right imbalance: right subtree is too tall.
+        else if (rightHeight - leftHeight > ALLOWED_IMBALANCE) {
+            TreeNode rightChild = treeNode.getRightChild();
+
+            // Right-Right: single left rotation.
+            if (getSubTreeHeight(rightChild.getRightChild()) >= getSubTreeHeight(rightChild.getLeftChild())) {
                 treeNode = rotateWithRightChild(treeNode);
                 this.lastRotationType = SINGLE_ROTATION;
             }
+            // Right-Left: double rotation (right then left).
             else {
                 treeNode = doubleRotateWithRightChild(treeNode);
                 this.lastRotationType = DOUBLE_ROTATION;
             }
         }
 
+        // Update the input node's height.
         int height = 1 + Math.max(getSubTreeHeight(treeNode.getLeftChild()), getSubTreeHeight(treeNode.getRightChild()));
         treeNode.setHeight(height);
 
         return treeNode;
     }
 
+    // Single Right Rotation for Left-Left imbalance.
     private TreeNode rotateWithLeftChild(TreeNode parent) {
         TreeNode child = parent.getLeftChild();
+
+        // Move the child's right subtree to be the parent's left subtree.
         parent.setLeftChild(child.getRightChild());
 
+        // The child will be the new root of this subtree.
         child.setRightChild(parent);
 
+        // Update all heights from bottom to top.
         int parentHeight = 1 + Math.max(getSubTreeHeight(parent.getLeftChild()), getSubTreeHeight(parent.getRightChild()));
         int childHeight = 1 + Math.max(getSubTreeHeight(child.getLeftChild()), parent.getHeight());
 
@@ -115,18 +134,26 @@ public class LazyAVLTree {
         return child;
     }
 
+    // Double rotation to fix Left-Right imbalance.
     private TreeNode doubleRotateWithLeftChild(TreeNode grandparent) {
+        // Left rotation on the left child.
         grandparent.setLeftChild(rotateWithRightChild(grandparent.getLeftChild()));
 
+        // Right rotation on the grandparent.
         return rotateWithLeftChild(grandparent);
     }
 
+    // Single Left Rotation for Right-Right imbalance.
     private TreeNode rotateWithRightChild(TreeNode parent) {
         TreeNode child = parent.getRightChild();
+
+        // Move the child's left subtree to be the parent's right subtree.
         parent.setRightChild(child.getLeftChild());
 
+        // The child is now the root of this subtree.
         child.setLeftChild(parent);
 
+        // Update heights from bottom to top.
         int parentHeight = 1 + Math.max(getSubTreeHeight(parent.getLeftChild()), getSubTreeHeight(parent.getRightChild()));
         int childHeight = 1 + Math.max(getSubTreeHeight(child.getRightChild()), parent.getHeight());
 
@@ -136,9 +163,12 @@ public class LazyAVLTree {
         return child;
     }
 
+    // Double rotation for Right-Left imbalance.
     private TreeNode doubleRotateWithRightChild(TreeNode grandparent) {
+        // Right rotation on the right child.
         grandparent.setRightChild(rotateWithLeftChild(grandparent.getRightChild()));
 
+        // Left rotation on the grandparent.
         return rotateWithRightChild(grandparent);
     }
 
