@@ -1,9 +1,12 @@
 public class LazyAVLTree {
     private TreeNode root;
     private String lastRotationType;
+    private boolean isInsertSuccessful;
 
     private static final int KEY_LOWER_LIMIT = 1;
     private static final int KEY_UPPER_LIMIT = 99;
+
+    private static final int ALLOWED_IMBALANCE = 1;
 
     private static final String NO_ROTATION = "NoRotation";
     private static final String SINGLE_ROTATION = "SingleRotation";
@@ -13,44 +16,130 @@ public class LazyAVLTree {
         this.root = null;
     }
 
-    private TreeNode getRoot() {
-        return this.root;
-    }
-
-    private void setRoot(TreeNode newRootNode) {
-        root = newRootNode;
-    }
-
     public String getLastRotationType() {
         return this.lastRotationType;
     }
 
     public boolean insert(int key) {
-        // Part A: make sure the key is within range.
+        // Make sure the key is within range.
         validateKey(key);
 
+        this.isInsertSuccessful = false;
 
+        this.root = insert(key, this.root);
+
+        return isInsertSuccessful;
+    }
+
+    private TreeNode insert(int key, TreeNode treeNode) {
+        if (treeNode == null) {
+            this.isInsertSuccessful = true;
+            return new TreeNode(key, null, null);
+        }
+
+        if (key < treeNode.getKey()) {
+            treeNode.setLeftChild(insert(key, treeNode.getLeftChild()));
+        }
+        else if (key > treeNode.getKey()) {
+            treeNode.setRightChild(insert(key, treeNode.getRightChild()));
+        }
+        else {
+            // Duplicate key found.
+            // If already deleted then re-activate it.
+            if (treeNode.isDeleted()) {
+                treeNode.undelete();
+                this.isInsertSuccessful = true;
+            }
+
+            // No rotation needed.
+            this.lastRotationType = NO_ROTATION;
+            return treeNode;
+        }
+
+        return balanceSubTree(treeNode);
     }
 
     // Returns the height of the node or -1 if null.
-    private int getHeight(TreeNode treeNode) {
+    private int getSubTreeHeight(TreeNode treeNode) {
         return treeNode == null ? -1 : treeNode.getHeight();
     }
 
-    // According to AVL definition, for every tree node x: -1 <= getBalance(x) <= 1.
-    private int getBalance(TreeNode treeNode) {
-        int leftChildHeight = (treeNode.getLeftChild() != null) ? treeNode.getLeftChild().getHeight() : -1;
-        int rightChildHeight = (treeNode.getRightChild() != null) ? treeNode.getRightChild().getHeight() : -1;
+    // Re-balance the subtree at the given node if it's not balanced.
+    // AVL trees allow a balance factor of -1, 0, or +1. If the node becomes
+    // too left heavy or right heavy after insert then rotations must occur
+    // to restore balance.
+    private TreeNode balanceSubTree(TreeNode treeNode) {
+        if (treeNode == null) {
+            return null;
+        }
 
-        return leftChildHeight - rightChildHeight;
+        if (getSubTreeHeight(treeNode.getLeftChild()) - getSubTreeHeight(treeNode.getRightChild()) > ALLOWED_IMBALANCE) {
+            if (getSubTreeHeight(treeNode.getLeftChild().getLeftChild()) >= getSubTreeHeight(treeNode.getLeftChild().getRightChild())) {
+                treeNode = rotateWithLeftChild(treeNode);
+                this.lastRotationType = SINGLE_ROTATION;
+            }
+            else {
+                treeNode = doubleRotateWithLeftChild(treeNode);
+                this.lastRotationType = DOUBLE_ROTATION;
+            }
+        }
+        else if (getSubTreeHeight(treeNode.getRightChild()) - getSubTreeHeight(treeNode.getLeftChild()) > ALLOWED_IMBALANCE) {
+            if (getSubTreeHeight(treeNode.getRightChild().getRightChild()) >= getSubTreeHeight(treeNode.getRightChild().getLeftChild())) {
+                treeNode = rotateWithRightChild(treeNode);
+                this.lastRotationType = SINGLE_ROTATION;
+            }
+            else {
+                treeNode = doubleRotateWithRightChild(treeNode);
+                this.lastRotationType = DOUBLE_ROTATION;
+            }
+        }
+
+        int height = 1 + Math.max(getSubTreeHeight(treeNode.getLeftChild()), getSubTreeHeight(treeNode.getRightChild()));
+        treeNode.setHeight(height);
+
+        return treeNode;
     }
 
-    private TreeNode rotateLeft(TreeNode oldRootNode) {
+    private TreeNode rotateWithLeftChild(TreeNode parent) {
+        TreeNode child = parent.getLeftChild();
+        parent.setLeftChild(child.getRightChild());
 
+        child.setRightChild(parent);
+
+        int parentHeight = 1 + Math.max(getSubTreeHeight(parent.getLeftChild()), getSubTreeHeight(parent.getRightChild()));
+        int childHeight = 1 + Math.max(getSubTreeHeight(child.getLeftChild()), parent.getHeight());
+
+        parent.setHeight(parentHeight);
+        child.setHeight(childHeight);
+
+        return child;
     }
 
-    private TreeNode rotateRight(TreeNode oldRootNode) {
+    private TreeNode doubleRotateWithLeftChild(TreeNode grandparent) {
+        grandparent.setLeftChild(rotateWithRightChild(grandparent.getLeftChild()));
 
+        return rotateWithLeftChild(grandparent);
+    }
+
+    private TreeNode rotateWithRightChild(TreeNode parent) {
+        TreeNode child = parent.getRightChild();
+        parent.setRightChild(child.getLeftChild());
+
+        child.setLeftChild(parent);
+
+        int parentHeight = 1 + Math.max(getSubTreeHeight(parent.getLeftChild()), getSubTreeHeight(parent.getRightChild()));
+        int childHeight = 1 + Math.max(getSubTreeHeight(child.getRightChild()), parent.getHeight());
+
+        parent.setHeight(parentHeight);
+        child.setHeight(childHeight);
+
+        return child;
+    }
+
+    private TreeNode doubleRotateWithRightChild(TreeNode grandparent) {
+        grandparent.setRightChild(rotateWithLeftChild(grandparent.getRightChild()));
+
+        return rotateWithRightChild(grandparent);
     }
 
 
@@ -82,7 +171,7 @@ public class LazyAVLTree {
 
     private TreeNode findTreeNode(int key) {
         // Start traversing from the root.
-        TreeNode currentNode = this.getRoot();
+        TreeNode currentNode = this.root;
 
         while (currentNode != null) {
             // By AVL definition a child node smaller than the
@@ -113,7 +202,7 @@ public class LazyAVLTree {
 
     // AVLs are BSTs so the max value is always the very right-most tree node.
     public int findMax() {
-        TreeNode max = findMax(this.getRoot());
+        TreeNode max = findMax(this.root);
 
         return (max != null) ? max.getKey() : -1;
     }
@@ -135,7 +224,7 @@ public class LazyAVLTree {
 
     // AVLs are BSTs so the min value is always the very left-most tree node.
     public int findMin() {
-        TreeNode min = findMin(this.getRoot());
+        TreeNode min = findMin(this.root);
 
         return (min != null) ? min.getKey() : -1;
     }
@@ -156,7 +245,7 @@ public class LazyAVLTree {
     }
 
     public int height() {
-        return height(this.getRoot());
+        return height(this.root);
     }
 
     private int height(TreeNode treeNode) {
@@ -179,7 +268,7 @@ public class LazyAVLTree {
     }
 
     public int size() {
-        return size(this.getRoot());
+        return size(this.root);
     }
 
     private int size(TreeNode treeNode) {
